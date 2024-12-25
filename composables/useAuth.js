@@ -1,26 +1,31 @@
 import { defineStore } from 'pinia'
 
-export const useAuth = defineStore('auth', {
+export const useAuthStore = defineStore('auth', {
     state: () => ({
         user: null,
+        isAuthenticated: false,
         token: null,
     }),
 
-    getters: {
-        isAuthenticated: (state) => !!state.token,
-    },
-
     actions: {
+        setUser(user) {
+            this.user = user
+            this.isAuthenticated = !!user
+        },
+
+        setToken(token) {
+            this.token = token
+        },
+
         async login(credentials) {
             try {
-                console.log('Login attempt with:', credentials)
-                    // Simulation de l'appel API pour le moment
+                // Simulation d'appel API pour le moment
                 const response = await $fetch('/api/auth/login', {
                     method: 'POST',
                     body: credentials,
                 })
-                this.token = response.token
-                this.user = response.user
+                this.setToken(response.token)
+                this.setUser(response.user)
                 return response
             } catch (error) {
                 console.error('Login error:', error)
@@ -29,8 +34,13 @@ export const useAuth = defineStore('auth', {
         },
 
         async logout() {
-            this.token = null
-            this.user = null
+            this.setUser(null)
+            this.setToken(null)
         },
+    },
+
+    getters: {
+        getUser: (state) => state.user,
+        getToken: (state) => state.token,
     },
 })

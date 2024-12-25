@@ -2,6 +2,7 @@ export default defineNuxtConfig({
     ssr: false,
     modules: ['@nuxtjs/tailwindcss', '@pinia/nuxt', '@vueuse/nuxt'],
     css: ['~/assets/css/main.css'],
+
     app: {
         head: {
             title: 'Troov App',
@@ -11,4 +12,14 @@ export default defineNuxtConfig({
             ],
         },
     },
+
+    pinia: {
+        autoImports: ['defineStore', 'storeToRefs'],
+    },
+
+    imports: {
+        dirs: ['stores'],
+    },
+
+    devtools: { enabled: true },
 })

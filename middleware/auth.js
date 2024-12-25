@@ -1,8 +1,10 @@
-export default defineNuxtRouteMiddleware((to, from) => {
-    const auth = useAuth()
+export default defineNuxtRouteMiddleware((to) => {
+    const auth = useAuthStore()
 
-    if (!auth.loggedIn) {
-        console.log('Utilisateur non authentifié, redirection vers login')
+    // Liste des routes publiques
+    const publicRoutes = ['/auth/login', '/auth/register', '/']
+
+    if (!auth.isAuthenticated && !publicRoutes.includes(to.path)) {
         return navigateTo('/auth/login')
     }
 })
