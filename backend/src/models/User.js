@@ -36,11 +36,7 @@ userSchema.pre("save", async function (next) {
 // Méthode pour vérifier le mot de passe
 userSchema.methods.comparePassword = async function (candidatePassword) {
   try {
-    console.log("Comparing passwords for:", this.email);
-    console.log("Stored hash:", this.password);
-    console.log("Candidate password:", candidatePassword);
     const isMatch = await bcrypt.compare(candidatePassword, this.password);
-    console.log("Password match result:", isMatch);
     return isMatch;
   } catch (error) {
     console.error("Password comparison error:", error);
