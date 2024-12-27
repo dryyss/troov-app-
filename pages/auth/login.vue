@@ -38,10 +38,14 @@
         </div>
 
         <form @submit.prevent="handleLogin" class="space-y-4">
+          <div v-if="error" class="p-3 bg-red-100 text-red-700 rounded-lg">
+            {{ error }}
+          </div>
           <input
             v-model="email"
             type="email"
             placeholder="Email"
+            autocomplete="email"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             required
           />
@@ -49,6 +53,7 @@
             v-model="password"
             type="password"
             placeholder="Password"
+            autocomplete="current-password"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             required
           />
@@ -98,16 +103,19 @@ const password = ref('')
 const rememberMe = ref(false)
 const router = useRouter()
 const auth = useAuthStore()
+const error = ref(null)
 
 const handleLogin = async () => {
+  error.value = null
   try {
     await auth.login({
       email: email.value,
       password: password.value,
     })
     router.push('/')
-  } catch (error) {
-    console.error('Erreur de connexion:', error)
+  } catch (err) {
+    console.error('Erreur de connexion:', err)
+    error.value = err.message || 'Une erreur est survenue lors de la connexion'
   }
 }
 </script>

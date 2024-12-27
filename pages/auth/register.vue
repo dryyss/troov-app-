@@ -38,10 +38,14 @@
         </div>
 
         <form @submit.prevent="handleRegister" class="space-y-4">
+          <div v-if="error" class="p-3 bg-red-100 text-red-700 rounded-lg">
+            {{ error }}
+          </div>
           <input
             v-model="name"
             type="text"
             placeholder="Name"
+            autocomplete="name"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             required
           />
@@ -49,6 +53,7 @@
             v-model="email"
             type="email"
             placeholder="Email"
+            autocomplete="email"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             required
           />
@@ -56,6 +61,7 @@
             v-model="password"
             type="password"
             placeholder="Password"
+            autocomplete="new-password"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             required
           />
@@ -85,9 +91,10 @@
 
           <button
             type="submit"
+            :disabled="loading"
             class="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg"
           >
-            SIGN UP
+            {{ loading ? 'Inscription en cours...' : 'SIGN UP' }}
           </button>
         </form>
 
@@ -108,32 +115,47 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '~/stores/auth'
 
 const router = useRouter()
+const auth = useAuthStore()
+
 const name = ref('')
 const email = ref('')
 const password = ref('')
 const agreeToTerms = ref(false)
+const error = ref(null)
+const loading = ref(false)
 
 const handleRegister = async () => {
   try {
     if (!agreeToTerms.value) {
-      alert('Please agree to the Terms and Conditions')
+      error.value = "Veuillez accepter les conditions d'utilisation"
       return
     }
 
-    await $fetch('/api/auth/register', {
-      method: 'POST',
-      body: {
-        name: name.value,
-        email: email.value,
-        password: password.value,
-      },
+    loading.value = true
+    error.value = null
+
+    console.log("Tentative d'inscription avec:", {
+      name: name.value,
+      email: email.value,
+      password: password.value,
     })
 
+    await auth.register({
+      name: name.value,
+      email: email.value,
+      password: password.value,
+    })
+
+    console.log('Inscription réussie')
     router.push('/auth/login')
-  } catch (error) {
-    console.error('Register error:', error)
+  } catch (err) {
+    console.error("Erreur d'inscription:", err)
+    error.value = err.message || "Une erreur est survenue lors de l'inscription"
+  } finally {
+    loading.value = false
   }
 }
 </script>
