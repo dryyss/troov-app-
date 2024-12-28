@@ -1,42 +1,58 @@
 const express = require("express");
-const mongoose = require("mongoose");
 const cors = require("cors");
+const mongoose = require("mongoose");
 require("dotenv").config();
-
-const authRoutes = require("./routes/auth.routes");
 
 const app = express();
 
-// Middleware
-app.use(cors());
+// Configuration CORS
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 app.use(express.json());
 
-// Connexion à MongoDB
-mongoose
-  .connect(process.env.MONGODB_URI)
-  .then(() => console.log("Connecté à MongoDB"))
-  .catch((err) => console.error("Erreur de connexion à MongoDB:", err));
+// Importer les routes
+const authRoutes = require("./routes/auth");
 
-// Routes
-app.use("/api/auth", authRoutes);
-
-// Route de test
+// Routes de base
 app.get("/", (req, res) => {
-  res.json({ message: "Bienvenue sur l'API Troov" });
+  res.json({ message: "API Troov Backend" });
 });
+
+// Utiliser les routes
+app.use("/api/auth", authRoutes);
 
 // Gestion des erreurs
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({
-    message: "Une erreur est survenue !",
-    error: process.env.NODE_ENV === "development" ? err.message : {},
+    success: false,
+    message: err.message || "Une erreur est survenue sur le serveur",
   });
 });
 
+// Port
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`Serveur démarré sur le port ${PORT}`);
-});
+
+// Connexion MongoDB avec options
+mongoose
+  .connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    console.log("Connecté à MongoDB");
+    app.listen(PORT, () => {
+      console.log(`Serveur démarré sur le port ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error("Erreur de connexion à MongoDB:", err);
+  });
 
 module.exports = app;
